@@ -20,7 +20,7 @@ func Parse(input string) (Selector, error) {
 	lex := NewJSONPathLexer(input)
 	for {
 		switch item := lex.Next(); item.Type {
-		case ItemEOF:
+		case itemEOF:
 			debug("EOF\n")
 			debugf("%d selectors\n", len(selectors))
 			switch len(selectors) {
@@ -31,37 +31,36 @@ func Parse(input string) (Selector, error) {
 			default:
 				return Chain(selectors...), nil
 			}
-		case ItemError:
+		case itemError:
 			debug("ERROR\n")
 			return nil, errors.New(item.Value)
-		case ItemDollar:
+		case itemDollar:
 			debug("DOLLAR ")
-			next := lex.Next()
-			if next.Type != ItemDot {
-				return nil, fmt.Errorf("expected \".\" but got %q", next.Value)
+			next, _ := lex.lex.Peek()
+			if next != '.' {
+				return nil, fmt.Errorf("expected \".\" but got %q", next)
 			}
-			// fallthrough
-		case ItemDotDot:
+		case itemDotDot:
 			debug("DOTDOT ")
 			fallthrough // FIXME
-		case ItemDot:
+		case itemDot:
 			debug("DOT\n")
 			switch next := lex.Next(); next.Type {
-			case ItemEOF:
+			case itemEOF:
 				return nil, errors.New("unexpected EOF")
-			case ItemStarStar:
+			case itemStarStar:
 				debug("STAR STAR\n")
 				selectors = append(selectors, RecursiveDescent)
-			case ItemStar:
+			case itemStar:
 				debug("STAR\n")
 				selectors = append(selectors, All)
-			case ItemPathKey:
+			case itemPathKey:
 				debugf("PATH KEY %s\n", next.Value)
 				selectors = append(selectors, Key(next.Value))
 			default:
 				return nil, fmt.Errorf("expected key but got %q", next.Value)
 			}
-		case ItemLeftBracket:
+		case itemLeftBracket:
 			debug("LEFTBRACKET\n")
 			sel, err := parseBracket(lex)
 			if err != nil {
