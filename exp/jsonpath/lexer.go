@@ -4,7 +4,7 @@
 
 // lexer.go [created: Sun, 23 Jun 2013]
 
-package lexer
+package jsonpath
 
 import (
 	"fmt"
@@ -14,6 +14,7 @@ import (
 	"github.com/bmatsuo/go-lexer"
 )
 
+// EOF is the constant for EOF
 const EOF = lexer.EOF
 
 const (
@@ -40,19 +41,31 @@ const (
 	ItemString
 )
 
-type Interface interface {
-	Next() *lexer.Item
+// JSONPathLexer is a wrapper around go-lexer lexer object
+type JSONPathLexer struct {
+	// Next() *lexer.Item
+	lex *lexer.Lexer
 }
 
-func New(input string) Interface {
-	return lexer.New(Start, input)
+// NewJSONPathLexer returns a new JSONPathLexer object
+func NewJSONPathLexer(input string) *JSONPathLexer {
+	return &JSONPathLexer{lex: lexer.New(Start, input)}
 }
 
+// Next calls next on the lexer object
+func (l *JSONPathLexer) Next() *lexer.Item {
+	return l.lex.Next()
+}
+
+// Start state for lexer
 func Start(lex *lexer.Lexer) lexer.StateFn {
+	// get rid of white space
 	if lex.AcceptRunRange(unicode.Space) > 0 {
 		lex.Ignore()
 		return Start
 	}
+
+	// handle DOTs
 	switch lex.AcceptRun(".") {
 	case 0:
 		break
@@ -67,6 +80,8 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 	default:
 		return lex.Errorf("unexpected '.'")
 	}
+
+	// wildcard
 	switch lex.AcceptRun("*") {
 	case 0:
 		break
@@ -80,6 +95,8 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 	default:
 		return lex.Errorf("unexpected '*'")
 	}
+
+	// everything else
 	switch r, _ := lex.Peek(); {
 	case r == lexer.EOF:
 		return nil
@@ -91,6 +108,7 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 		debugln("FOUND LEFT BRACKET")
 		lex.Advance()
 		lex.Emit(ItemLeftBracket)
+		return Bracket
 	case r == ']':
 		debugln("FOUND RIGHT BRACKET")
 		lex.Advance()
@@ -133,6 +151,8 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 			return lex.Errorf("expected '=' got %c", r)
 		}
 	}
+
+	// default
 	return Start
 }
 
@@ -186,6 +206,7 @@ func Number(lex *lexer.Lexer) lexer.StateFn {
 	return Start
 }
 
+// Bracket state
 func Bracket(lex *lexer.Lexer) lexer.StateFn {
 	switch r, _ := lex.Peek(); {
 	case r == lexer.EOF:
@@ -283,4 +304,3 @@ func debugf(format string, v ...interface{}) {
 		fmt.Fprintf(os.Stderr, format, v...)
 	}
 }
-
