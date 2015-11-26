@@ -88,10 +88,12 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 	case 1:
 		// debugln("FOUND STAR")
 		lex.Emit(itemStar)
-	case 2:
-		// debugln("FOUND STAR STAR")
-		lex.Emit(itemStarStar)
 		return Start
+	// why do we even need STAR STAR?
+	// case 2:
+	// 	// debugln("FOUND STAR STAR")
+	// 	lex.Emit(itemStarStar)
+	// 	return Start
 	default:
 		return lex.Errorf("unexpected '*'")
 	}
@@ -179,8 +181,10 @@ func PathKey(lex *lexer.Lexer) lexer.StateFn {
 
 // Number state. keep going until we can parse the number
 func Number(lex *lexer.Lexer) lexer.StateFn {
+	// keep advancing as long as we see digits
 	if lex.AcceptRunRange(unicode.Digit) == 0 {
 		r, _ := lex.Peek()
+		// (PC) I don't believe this catches the `.12345` decimal case
 		if r == lexer.EOF {
 			return nil
 		}

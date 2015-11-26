@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"pchang211/go-jsontree/exp/jsonpath"
+	"pchang211/go-jsontree/jsonpath"
 )
 
 func main() {
