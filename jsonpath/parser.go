@@ -21,19 +21,24 @@ type JSONPath struct {
 	tail *Traverser
 }
 
-// NewJSONPath instantiates and returns a new JSONPath object
-func NewJSONPath(f func(interface{}) interface{}) *JSONPath {
-	initialTraverser := &Traverser{Traverse: f}
-	return &JSONPath{
-		head: initialTraverser,
-		tail: initialTraverser,
-	}
-}
+// // NewJSONPath instantiates and returns a new JSONPath object
+// func NewJSONPath(f func(interface{}) interface{}) *JSONPath {
+// 	initialTraverser := &Traverser{Traverse: f}
+// 	return &JSONPath{
+// 		head: initialTraverser,
+// 		tail: initialTraverser,
+// 	}
+// }
 
 // AddTraverser appends a new traverser to the JSONPath's linked list
 // of Traverser objects
 func (j *JSONPath) AddTraverser(traverser *Traverser) {
-	j.tail.child = traverser
+	// unitialized JSONPath
+	if j.head == nil {
+		j.head = traverser
+	} else {
+		j.tail.child = traverser
+	}
 	j.tail = traverser
 }
 
@@ -49,11 +54,16 @@ func (j *JSONPath) TraverseJSON(json interface{}) interface{} {
 	}
 }
 
-// Traverser is a linked list of traverser objects, each of which has a
-// function Traverse(), which advances through a json object
+// Traverser is really a linked list wrapper over Traverse() function.
+// Traverse() advances through an input json object and returns the result
 type Traverser struct {
 	child    *Traverser
 	Traverse func(interface{}) interface{}
+}
+
+// NewTraverser returns a new Traverser object
+func NewTraverser(f func(interface{}) interface{}) *Traverser {
+	return &Traverser{Traverse: f}
 }
 
 // Parse takes an input string, instantiates a lexer with the input
