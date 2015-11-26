@@ -123,8 +123,3 @@ func Parse(input string) (*JSONPath, error) {
 		}
 	}
 }
-
-func parseBracket(lex *PathLexer) (Selector, error) {
-	debugln("parseBracket")
-	return nil, fmt.Errorf("not implemented")
-}
