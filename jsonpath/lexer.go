@@ -110,11 +110,12 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 		// debugln("FOUND LEFT BRACKET")
 		lex.Advance()
 		lex.Emit(itemLeftBracket)
-		// return Bracket
+		return Bracket
 	case r == ']':
 		// debugln("FOUND RIGHT BRACKET")
 		lex.Advance()
 		lex.Emit(itemRightBracket)
+		return Start
 	case r == '$':
 		// debugln("FOUND DOLLAR")
 		lex.Advance()
@@ -213,47 +214,17 @@ func Number(lex *lexer.Lexer) lexer.StateFn {
 // }
 //
 
-//
-// // Bracket state
-// func Bracket(lex *lexer.Lexer) lexer.StateFn {
-// 	switch r, _ := lex.Peek(); {
-// 	case r == lexer.EOF:
-// 		return nil
-// 	case unicode.IsDigit(r):
-// 		return BracketNumber
-// 	case unicode.IsLetter(r):
-// 		return BracketKey
-// 	case r == '>':
-// 		lex.Advance()
-// 		if r, _ := lex.Peek(); r == '=' {
-// 			lex.Advance()
-// 			lex.Emit(itemGreaterEqual)
-// 		} else {
-// 			lex.Emit(itemGreater)
-// 		}
-// 	case r == '<':
-// 		lex.Advance()
-// 		if r, _ := lex.Peek(); r == '=' {
-// 			lex.Advance()
-// 			lex.Emit(itemLessEqual)
-// 		} else {
-// 			lex.Emit(itemLess)
-// 		}
-// 	case r == '=':
-// 		lex.Advance()
-// 		lex.Emit(itemEqual)
-// 	case r == '!':
-// 		lex.Advance()
-// 		if r, _ := lex.Peek(); r == '=' {
-// 			lex.Advance()
-// 			lex.Emit(itemNotEqual)
-// 		} else {
-// 			lex.Errorf("expected '=' got %c", r)
-// 			return nil
-// 		}
-// 	}
-// 	return Bracket
-// }
+// Bracket state
+func Bracket(lex *lexer.Lexer) lexer.StateFn {
+	switch r, _ := lex.Peek(); {
+	case r == lexer.EOF:
+		return nil
+	case unicode.IsDigit(r):
+		debugln("seen digit")
+	}
+	return Start
+}
+
 //
 // func BracketNumber(lex *lexer.Lexer) lexer.StateFn {
 // 	if lex.AcceptRunRange(unicode.Digit) == 0 {

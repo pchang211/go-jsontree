@@ -94,10 +94,9 @@ func Parse(input string) (*JSONPath, error) {
 				return nil, errors.New("unexpected EOF")
 			case itemStarStar:
 				debug("STAR STAR\n")
-				// selectors = append(selectors, RecursiveDescent)
 			case itemStar:
 				debug("STAR\n")
-				// selectors = append(selectors, All)
+				path.AddTraverser(NewTraverser(TStar()))
 			case itemPathKey:
 				debugf("PATH KEY %s\n", next.Value)
 				path.AddTraverser(NewTraverser(TKey(next.Value)))
@@ -106,11 +105,21 @@ func Parse(input string) (*JSONPath, error) {
 			}
 		case itemLeftBracket:
 			debug("LEFTBRACKET\n")
-			// sel, err := parseBracket(lex)
-			// if err != nil {
-			// 	return nil, err
-			// }
-			// selectors = append(selectors, sel)
+			switch next := lex.Next(); next.Type {
+			case itemNumber:
+				path.AddTraverser(NewTraverser(IndexKey(next.Value)))
+				if next = lex.Next(); next.Type != itemRightBracket {
+					return nil, fmt.Errorf("expected ']'")
+				}
+			case itemRightBracket:
+				// no index or query
+				debugf("right bracket")
+			}
+		case itemRightBracket:
+			debug("RIGHTBRACKET\n")
+			return nil, fmt.Errorf("close bracket ] seen without open bracket")
+		default:
+			debugf("Not sure what to do with %v", item.Type)
 		}
 	}
 }
