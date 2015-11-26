@@ -13,6 +13,49 @@ import (
 
 const parseDebug = true
 
+// JSONPath is an object that can take in a json object, traverse according
+// to the rules in the traverser, and return the resulting json. Underlying
+// implementation is a singly linked list of Traverser objects
+type JSONPath struct {
+	head *Traverser
+	tail *Traverser
+}
+
+// NewJSONPath instantiates and returns a new JSONPath object
+func NewJSONPath(f func(interface{}) interface{}) *JSONPath {
+	initialTraverser := &Traverser{Traverse: f}
+	return &JSONPath{
+		head: initialTraverser,
+		tail: initialTraverser,
+	}
+}
+
+// AddTraverser appends a new traverser to the JSONPath's linked list
+// of Traverser objects
+func (j *JSONPath) AddTraverser(traverser *Traverser) {
+	j.tail.child = traverser
+	j.tail = traverser
+}
+
+// TraverseJSON takes in a json object and returns the subobject specified
+// by the JSONPath
+func (j *JSONPath) TraverseJSON(json interface{}) interface{} {
+	for {
+		if j.head == nil {
+			return json
+		}
+		json = j.head.Traverse(json)
+		j.head = j.head.child
+	}
+}
+
+// Traverser is a linked list of traverser objects, each of which has a
+// function Traverse(), which advances through a json object
+type Traverser struct {
+	child    *Traverser
+	Traverse func(interface{}) interface{}
+}
+
 // Parse takes an input string, instantiates a lexer with the input
 // reads each token until EOF and returns (for now) Selector functions
 func Parse(input string) (Selector, error) {
@@ -72,6 +115,6 @@ func Parse(input string) (Selector, error) {
 }
 
 func parseBracket(lex *PathLexer) (Selector, error) {
-	debug("parseBracket")
+	debugln("parseBracket")
 	return nil, fmt.Errorf("not implemented")
 }
