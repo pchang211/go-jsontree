@@ -17,7 +17,7 @@ const parseDebug = true
 // reads each token until EOF and returns (for now) Selector functions
 func Parse(input string) (Selector, error) {
 	selectors := make([]Selector, 0, 1)
-	lex := NewJSONPathLexer(input)
+	lex := NewPathLexer(input)
 	for {
 		switch item := lex.Next(); item.Type {
 		case itemEOF:
@@ -71,7 +71,7 @@ func Parse(input string) (Selector, error) {
 	}
 }
 
-func parseBracket(lex *JSONPathLexer) (Selector, error) {
+func parseBracket(lex *PathLexer) (Selector, error) {
 	debug("parseBracket")
 	return nil, fmt.Errorf("not implemented")
 }

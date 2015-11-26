@@ -41,19 +41,19 @@ const (
 	ittemString
 )
 
-// JSONPathLexer is a wrapper around go-lexer lexer object
-type JSONPathLexer struct {
+// PathLexer is a wrapper around go-lexer lexer object
+type PathLexer struct {
 	// Next() *lexer.Item
 	lex *lexer.Lexer
 }
 
-// NewJSONPathLexer returns a new JSONPathLexer object
-func NewJSONPathLexer(input string) *JSONPathLexer {
-	return &JSONPathLexer{lex: lexer.New(Start, input)}
+// NewPathLexer returns a new PathLexer object
+func NewPathLexer(input string) *PathLexer {
+	return &PathLexer{lex: lexer.New(Start, input)}
 }
 
 // Next calls next on the lexer object
-func (l *JSONPathLexer) Next() *lexer.Item {
+func (l *PathLexer) Next() *lexer.Item {
 	return l.lex.Next()
 }
 
@@ -108,7 +108,7 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 		// debugln("FOUND LEFT BRACKET")
 		lex.Advance()
 		lex.Emit(itemLeftBracket)
-		return Bracket
+		// return Bracket
 	case r == ']':
 		// debugln("FOUND RIGHT BRACKET")
 		lex.Advance()
@@ -156,16 +156,7 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 	return Start
 }
 
-func StartBracket(lex *lexer.Lexer) lexer.StateFn {
-	if lex.Accept("[") {
-		lex.Emit(itemLeftBracket)
-		return Bracket
-	} else {
-		lex.Errorf("missing '['")
-		return nil
-	}
-}
-
+// PathKey state. Keep going while we hit letters
 func PathKey(lex *lexer.Lexer) lexer.StateFn {
 	found := false
 	for {
@@ -186,6 +177,7 @@ func PathKey(lex *lexer.Lexer) lexer.StateFn {
 	return Start
 }
 
+// Number state. keep going until we can parse the number
 func Number(lex *lexer.Lexer) lexer.StateFn {
 	if lex.AcceptRunRange(unicode.Digit) == 0 {
 		r, _ := lex.Peek()
@@ -206,84 +198,96 @@ func Number(lex *lexer.Lexer) lexer.StateFn {
 	return Start
 }
 
-// Bracket state
-func Bracket(lex *lexer.Lexer) lexer.StateFn {
-	switch r, _ := lex.Peek(); {
-	case r == lexer.EOF:
-		return nil
-	case unicode.IsDigit(r):
-		return BracketNumber
-	case unicode.IsLetter(r):
-		return BracketKey
-	case r == '>':
-		lex.Advance()
-		if r, _ := lex.Peek(); r == '=' {
-			lex.Advance()
-			lex.Emit(itemGreaterEqual)
-		} else {
-			lex.Emit(itemGreater)
-		}
-	case r == '<':
-		lex.Advance()
-		if r, _ := lex.Peek(); r == '=' {
-			lex.Advance()
-			lex.Emit(itemLessEqual)
-		} else {
-			lex.Emit(itemLess)
-		}
-	case r == '=':
-		lex.Advance()
-		lex.Emit(itemEqual)
-	case r == '!':
-		lex.Advance()
-		if r, _ := lex.Peek(); r == '=' {
-			lex.Advance()
-			lex.Emit(itemNotEqual)
-		} else {
-			lex.Errorf("expected '=' got %c", r)
-			return nil
-		}
-	}
-	return Bracket
-}
+// func StartBracket(lex *lexer.Lexer) lexer.StateFn {
+// 	if lex.Accept("[") {
+// 		lex.Emit(itemLeftBracket)
+// 		return Bracket
+// 	} else {
+// 		lex.Errorf("missing '['")
+// 		return nil
+// 	}
+// }
+//
 
-func BracketNumber(lex *lexer.Lexer) lexer.StateFn {
-	if lex.AcceptRunRange(unicode.Digit) == 0 {
-		r, _ := lex.Peek()
-		if r == lexer.EOF {
-			return nil
-		}
-		lex.Errorf("expected digit got %c", r)
-	}
-	if lex.Accept(".") {
-		lex.AcceptRunRange(unicode.Digit)
-	}
-	if lex.Accept("e") {
-		lex.Accept("-")
-		lex.AcceptRunRange(unicode.Digit)
-	}
-	lex.Emit(itemNumber)
-	return Bracket
-}
-
-func BracketKey(lex *lexer.Lexer) lexer.StateFn {
-	if lex.AcceptRunRange(unicode.Letter) > 0 {
-		lex.Emit(itemPathKey)
-		switch r, _ := lex.Peek(); r {
-		case lexer.EOF:
-			return nil
-		case '.':
-			lex.Advance()
-			lex.Emit(itemDot)
-			return BracketKey
-		}
-	}
-	r, _ := lex.Peek()
-	if r != lexer.EOF {
-		lex.Errorf("expected key got EOF")
-	}
-	return nil
-}
+//
+// // Bracket state
+// func Bracket(lex *lexer.Lexer) lexer.StateFn {
+// 	switch r, _ := lex.Peek(); {
+// 	case r == lexer.EOF:
+// 		return nil
+// 	case unicode.IsDigit(r):
+// 		return BracketNumber
+// 	case unicode.IsLetter(r):
+// 		return BracketKey
+// 	case r == '>':
+// 		lex.Advance()
+// 		if r, _ := lex.Peek(); r == '=' {
+// 			lex.Advance()
+// 			lex.Emit(itemGreaterEqual)
+// 		} else {
+// 			lex.Emit(itemGreater)
+// 		}
+// 	case r == '<':
+// 		lex.Advance()
+// 		if r, _ := lex.Peek(); r == '=' {
+// 			lex.Advance()
+// 			lex.Emit(itemLessEqual)
+// 		} else {
+// 			lex.Emit(itemLess)
+// 		}
+// 	case r == '=':
+// 		lex.Advance()
+// 		lex.Emit(itemEqual)
+// 	case r == '!':
+// 		lex.Advance()
+// 		if r, _ := lex.Peek(); r == '=' {
+// 			lex.Advance()
+// 			lex.Emit(itemNotEqual)
+// 		} else {
+// 			lex.Errorf("expected '=' got %c", r)
+// 			return nil
+// 		}
+// 	}
+// 	return Bracket
+// }
+//
+// func BracketNumber(lex *lexer.Lexer) lexer.StateFn {
+// 	if lex.AcceptRunRange(unicode.Digit) == 0 {
+// 		r, _ := lex.Peek()
+// 		if r == lexer.EOF {
+// 			return nil
+// 		}
+// 		lex.Errorf("expected digit got %c", r)
+// 	}
+// 	if lex.Accept(".") {
+// 		lex.AcceptRunRange(unicode.Digit)
+// 	}
+// 	if lex.Accept("e") {
+// 		lex.Accept("-")
+// 		lex.AcceptRunRange(unicode.Digit)
+// 	}
+// 	lex.Emit(itemNumber)
+// 	return Bracket
+// }
+//
+// func BracketKey(lex *lexer.Lexer) lexer.StateFn {
+// 	if lex.AcceptRunRange(unicode.Letter) > 0 {
+// 		lex.Emit(itemPathKey)
+// 		switch r, _ := lex.Peek(); r {
+// 		case lexer.EOF:
+// 			return nil
+// 		case '.':
+// 			lex.Advance()
+// 			lex.Emit(itemDot)
+// 			return BracketKey
+// 		}
+// 	}
+// 	r, _ := lex.Peek()
+// 	if r != lexer.EOF {
+// 		lex.Errorf("expected key got EOF")
+// 	}
+// 	return nil
+// }
 
 func debug(v ...interface{}) {
 	if parseDebug {
