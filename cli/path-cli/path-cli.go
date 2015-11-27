@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"pchang211/go-jsontree/jsonpath"
+	"pchang211/jsonpath/jsonpath"
 )
 
 func main() {
