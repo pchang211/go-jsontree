@@ -1,8 +1,5 @@
-// Copyright 2013, Bryan Matsuo. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-// parser.go [created: Fri, 21 Jun 2013]
+// updated by Philip Chang
+// originally forked from Bryan Matsuo
 
 package jsonpath
 
@@ -11,7 +8,7 @@ import (
 	"fmt"
 )
 
-const parseDebug = true
+const parseDebug = false
 
 // JSONPath is an object that can take in a json object, traverse according
 // to the rules in the traverser, and return the resulting json. Underlying

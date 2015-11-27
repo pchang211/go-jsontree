@@ -41,9 +41,8 @@ const (
 	ittemString
 )
 
-// PathLexer is a wrapper around go-lexer lexer object
+// PathLexer is a wrapper around the go-lexer lexer object
 type PathLexer struct {
-	// Next() *lexer.Item
 	lex *lexer.Lexer
 }
 
@@ -70,11 +69,9 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 	case 0:
 		break
 	case 1:
-		// debugln("FOUND DOT")
 		lex.Emit(itemDot)
 		return Start
 	case 2:
-		// debugln("FOUND DOT DOT")
 		lex.Emit(itemDotDot)
 		return Start
 	default:
@@ -86,14 +83,11 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 	case 0:
 		break
 	case 1:
-		// debugln("FOUND STAR")
 		lex.Emit(itemStar)
 		return Start
-	// why do we even need STAR STAR?
-	// case 2:
-	// 	// debugln("FOUND STAR STAR")
-	// 	lex.Emit(itemStarStar)
-	// 	return Start
+	case 2:
+		lex.Emit(itemStarStar)
+		return Start
 	default:
 		return lex.Errorf("unexpected '*'")
 	}
@@ -107,47 +101,40 @@ func Start(lex *lexer.Lexer) lexer.StateFn {
 	case unicode.IsDigit(r):
 		return Number
 	case r == '[':
-		// debugln("FOUND LEFT BRACKET")
 		lex.Advance()
 		lex.Emit(itemLeftBracket)
 		return Bracket
 	case r == ']':
-		// debugln("FOUND RIGHT BRACKET")
 		lex.Advance()
 		lex.Emit(itemRightBracket)
 		return Start
 	case r == '$':
-		// debugln("FOUND DOLLAR")
 		lex.Advance()
 		lex.Emit(itemDollar)
+
+	// (currently) unused characters
 	case r == '>':
 		lex.Advance()
 		if r, _ := lex.Peek(); r == '=' {
-			// debugln("FOUND GREATER EQUAL")
 			lex.Advance()
 			lex.Emit(itemGreaterEqual)
 		} else {
-			// debugln("FOUND GREATER")
 			lex.Emit(itemGreater)
 		}
 	case r == '<':
 		lex.Advance()
 		if r, _ := lex.Peek(); r == '=' {
-			// debugln("FOUND LESS EQUAL")
 			lex.Advance()
 			lex.Emit(itemLessEqual)
 		} else {
-			// debugln("FOUND LESS")
 			lex.Emit(itemLess)
 		}
 	case r == '=':
-		// debugln("FOUND EQUAL")
 		lex.Advance()
 		lex.Emit(itemEqual)
 	case r == '!':
 		lex.Advance()
 		if r, _ := lex.Peek(); r == '=' {
-			// debugln("FOUND NOT EQUAL")
 			lex.Advance()
 			lex.Emit(itemNotEqual)
 		} else {
@@ -191,7 +178,6 @@ func Number(lex *lexer.Lexer) lexer.StateFn {
 		}
 		return lex.Errorf("expected digit got %c", r)
 	}
-	// debugln("FOUND NUMBER")
 	if lex.Accept(".") {
 		lex.AcceptRunRange(unicode.Digit)
 	}
@@ -207,9 +193,9 @@ func Number(lex *lexer.Lexer) lexer.StateFn {
 func Bracket(lex *lexer.Lexer) lexer.StateFn {
 	switch r, _ := lex.Peek(); {
 	case r == lexer.EOF:
+		lex.Emit(itemError)
 		return nil
 	case unicode.IsDigit(r):
-		debugln("seen digit")
 		return Start
 	}
 	return nil
