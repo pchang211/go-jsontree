@@ -84,22 +84,19 @@ func Parse(input string) (*JSONPath, error) {
 			if next != '.' {
 				return nil, fmt.Errorf("expected \".\" but got %q", next)
 			}
-		case itemDotDot:
-			debug("DOTDOT ")
-			fallthrough // FIXME
 		case itemDot:
 			debug("DOT\n")
 			switch next := lex.Next(); next.Type {
 			case itemEOF:
 				return nil, errors.New("unexpected EOF")
-			case itemStarStar:
-				debug("STAR STAR\n")
+			// case itemStarStar:
+			// 	debug("STAR STAR\n")
 			case itemStar:
 				debug("STAR\n")
-				path.AddTraverser(NewTraverser(TStar()))
+				path.AddTraverser(NewTraverser(Star()))
 			case itemPathKey:
 				debugf("PATH KEY %s\n", next.Value)
-				path.AddTraverser(NewTraverser(TKey(next.Value)))
+				path.AddTraverser(NewTraverser(Key(next.Value)))
 			default:
 				return nil, fmt.Errorf("expected key but got %q", next.Value)
 			}

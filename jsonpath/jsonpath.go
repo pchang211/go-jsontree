@@ -6,8 +6,8 @@ import (
 	"strconv"
 )
 
-// TKey (placeholder) takes in a key name and provides a function to get that key's object
-func TKey(key string) TraverseFunc {
+// Key (placeholder) takes in a key name and provides a function to get that key's object
+func Key(key string) TraverseFunc {
 	return func(json interface{}) (interface{}, error) {
 		if jsonMap, ok := json.(map[string]interface{}); ok {
 			return getValue(jsonMap, key)
@@ -38,8 +38,8 @@ func getValue(json map[string]interface{}, key string) (interface{}, error) {
 	return nil, fmt.Errorf("did not find key '%v' in body: %v", key, json)
 }
 
-// TStar (placeholder) just returns all the shit at the current json level because it's a WILDCARD!!
-func TStar() TraverseFunc {
+// Star (placeholder) just returns all the shit at the current json level because it's a WILDCARD!!
+func Star() TraverseFunc {
 	return func(json interface{}) (interface{}, error) {
 		if jsonMap, ok := json.(map[string]interface{}); ok {
 			var responseArr []interface{}
