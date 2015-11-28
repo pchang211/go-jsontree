@@ -13,7 +13,7 @@ Implements a subset of the path extraction tool for JSON discussed in http://goe
 Supports simple path selection and array indexing. For example, given the body
 
 ```
-{"foo":{"bar":"baz"}}
+{"foo":{"bar":"baz", "array":["hello", "world"]}}
 ```
 
 selection with the following will yield
@@ -21,6 +21,10 @@ selection with the following will yield
 ```
 $.foo.bar
 >> "baz"
+$.foo.array[0]
+>> "hello"
+$.foo.array[1]
+>> "world"
 ```
 
 Author
