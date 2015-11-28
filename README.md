@@ -23,8 +23,8 @@ $.foo.bar
 >> "baz"
 $.foo.array[0]
 >> "hello"
-$.foo.array[1]
->> "world"
+$.foo.array.*
+>> ["hello","world"]
 ```
 
 Author
