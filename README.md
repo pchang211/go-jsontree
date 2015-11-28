@@ -1,22 +1,32 @@
-traverse json paths 
+package to traverse through json objects 
 
 Install
 =======
 
-    go get github.com/pchang211/go-jsontree
+    go get github.com/pchang211/go-jsontree/exp/jsonpath
+
+Usage
+======
+
+Implements a subset of the path extraction tool for JSON discussed in http://goessner.net/articles/JsonPath/
+
+Supports simple path selection and array indexing. For example, given the body
+
+```
+{"foo":{"bar":"baz"}}
+```
+
+selection with the following will yield
+
+```
+$.foo.bar
+>> "baz"
+```
 
 Author
 ======
 
-Philip Chang [pchang211 at gmail dot com]
-
-Forked from: 
+Philip Chang [pchang211@gmail.com]
+Adapted from: 
 Bryan Matsuo [bryan dot matsuo at gmail dot com]
 
-Copyright & License
-===================
-
-Copyright (c) 2013, Bryan Matsuo.
-All rights reserved.
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file.
