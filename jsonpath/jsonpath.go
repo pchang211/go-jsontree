@@ -6,6 +6,58 @@ import (
 	"strconv"
 )
 
+// JSONPath is an object that can take in a json object, traverse according
+// to the rules in the traverser, and return the resulting json. Underlying
+// implementation is a singly linked list of Traverser objects
+type JSONPath struct {
+	head *Traverser
+	tail *Traverser
+}
+
+// AddTraverser appends a new traverser to the JSONPath's linked list
+// of Traverser objects
+func (j *JSONPath) AddTraverser(traverser *Traverser) {
+	// unitialized JSONPath
+	if j.head == nil {
+		j.head = traverser
+	} else {
+		j.tail.child = traverser
+	}
+	j.tail = traverser
+}
+
+// TraverseJSON takes in a json object and returns the subobject specified
+// by the JSONPath
+func (j *JSONPath) TraverseJSON(json interface{}) (interface{}, error) {
+	for {
+		if j.head == nil {
+			return json, nil
+		}
+		var err error
+		json, err = j.head.Traverse(json)
+		if err != nil {
+			return nil, err
+		}
+		j.head = j.head.child
+	}
+}
+
+// TraverseFunc is a function that takes in json and returns json.
+// Should traverse through the input json
+type TraverseFunc func(interface{}) (interface{}, error)
+
+// Traverser is really a linked list wrapper over Traverse() functions.
+// Traverse() advances through an input json object and returns the result
+type Traverser struct {
+	child    *Traverser
+	Traverse TraverseFunc
+}
+
+// NewTraverser returns a new Traverser object
+func NewTraverser(f TraverseFunc) *Traverser {
+	return &Traverser{Traverse: f}
+}
+
 // Key (placeholder) takes in a key name and provides a function to get that key's object
 func Key(key string) TraverseFunc {
 	return func(json interface{}) (interface{}, error) {
@@ -62,6 +114,11 @@ func IndexKey(query string) TraverseFunc {
 			if err != nil {
 				return nil, err
 			}
+			// special case for my use case
+			if len(jsonArray) == 0 {
+				return nil, nil
+			}
+
 			if i >= len(jsonArray) {
 				return nil, fmt.Errorf("index array out of range. actual len = %v", len(jsonArray))
 			}
