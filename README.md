@@ -3,7 +3,7 @@ package to traverse through json objects
 Install
 =======
 
-    go get github.com/pchang211/go-jsontree/exp/jsonpath
+    go get github.com/pchang211/jsonpath/jsonpath
 
 Usage
 ======
