@@ -58,6 +58,18 @@ func NewTraverser(f TraverseFunc) *Traverser {
 	return &Traverser{Traverse: f}
 }
 
+// EmptyArrayError is the error thrown when trying to index an empty array
+type EmptyArrayError struct {
+}
+
+func NewEmptyArrayError() *EmptyArrayError {
+	return &EmptyArrayError{}
+}
+
+func (e EmptyArrayError) Error() string {
+	return fmt.Sprintf("Trying to index an empty array")
+}
+
 // Key (placeholder) takes in a key name and provides a function to get that key's object
 func Key(key string) TraverseFunc {
 	return func(json interface{}) (interface{}, error) {
@@ -114,9 +126,8 @@ func IndexKey(query string) TraverseFunc {
 			if err != nil {
 				return nil, err
 			}
-			// special case for my use case
 			if len(jsonArray) == 0 {
-				return nil, nil
+				return nil, NewEmptyArrayError()
 			}
 
 			if i >= len(jsonArray) {
