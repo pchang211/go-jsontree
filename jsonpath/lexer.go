@@ -153,8 +153,10 @@ func PathKey(lex *lexer.Lexer) lexer.StateFn {
 		if lex.AcceptRun("_") > 0 {
 			found = true
 			continue
-		}
-		if lex.AcceptRunRange(unicode.Letter) > 0 {
+		} else if lex.AcceptRunRange(unicode.Letter) > 0 {
+			found = true
+			continue
+		} else if lex.AcceptRunRange(unicode.Digit) > 0 {
 			found = true
 			continue
 		}
