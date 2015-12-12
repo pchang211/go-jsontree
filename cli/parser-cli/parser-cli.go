@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"pchang211/jsonpath/jsonpath"
+	"pchang211/jsonpath"
 )
 
 func main() {

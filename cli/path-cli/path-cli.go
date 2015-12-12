@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/jsonpath/jsonpath"
+	"pchang211/jsonpath"
 )
 
 func main() {

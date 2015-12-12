@@ -45,3 +45,13 @@ func TestWildcardSelect(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, 2, len(resultArr))
 }
+
+func TestMultipleTraverses(t *testing.T) {
+	path, err := Parse("$.foo.bar")
+	assert.NoError(t, err)
+	body := getJSONBody(`{"foo":{"bar":"baz"}}`)
+	path.TraverseJSON(body)
+	result, err := path.TraverseJSON(body)
+	assert.NoError(t, err)
+	assert.Equal(t, "baz", result)
+}

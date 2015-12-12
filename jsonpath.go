@@ -29,17 +29,16 @@ func (j *JSONPath) AddTraverser(traverser *Traverser) {
 // TraverseJSON takes in a json object and returns the subobject specified
 // by the JSONPath
 func (j *JSONPath) TraverseJSON(json interface{}) (interface{}, error) {
-	for {
-		if j.head == nil {
-			return json, nil
-		}
+	current := j.head
+	for current != nil {
 		var err error
-		json, err = j.head.Traverse(json)
+		json, err = current.Traverse(json)
 		if err != nil {
 			return nil, err
 		}
-		j.head = j.head.child
+		current = current.child
 	}
+	return json, nil
 }
 
 // TraverseFunc is a function that takes in json and returns json.
