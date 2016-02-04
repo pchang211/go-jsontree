@@ -61,6 +61,7 @@ func NewTraverser(f TraverseFunc) *Traverser {
 type EmptyArrayError struct {
 }
 
+// NewEmptyArrayError return a new empty array error
 func NewEmptyArrayError() *EmptyArrayError {
 	return &EmptyArrayError{}
 }
@@ -135,5 +136,33 @@ func IndexKey(query string) TraverseFunc {
 			return jsonArray[i], nil
 		}
 		return nil, fmt.Errorf("cannot index json object: %v", json)
+	}
+}
+
+// LessThan compares the current json value (must be a number) to the input int
+func LessThan(compareVal string) TraverseFunc {
+	return func(json interface{}) (interface{}, error) {
+		if jsonVal, ok := json.(float64); ok {
+			compVal, err := strconv.ParseFloat(compareVal, 64)
+			if err != nil {
+				return nil, err
+			}
+			return (jsonVal < compVal), nil
+		}
+		return nil, fmt.Errorf("jsonpath value (%v) is not a float64, is %v. only float64 supported currently", json, reflect.TypeOf(json))
+	}
+}
+
+// GreaterThan compares the current json value (must be a number) to the input int
+func GreaterThan(compareVal string) TraverseFunc {
+	return func(json interface{}) (interface{}, error) {
+		if jsonVal, ok := json.(float64); ok {
+			compVal, err := strconv.ParseFloat(compareVal, 64)
+			if err != nil {
+				return nil, err
+			}
+			return (jsonVal > compVal), nil
+		}
+		return nil, fmt.Errorf("jsonpath value (%v) is not a float64, is %v. only float64 supported currently", json, reflect.TypeOf(json))
 	}
 }

@@ -55,3 +55,36 @@ func TestMultipleTraverses(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "baz", result)
 }
+
+func TestGreaterThan(t *testing.T) {
+	path, err := Parse("$.foo>1")
+	assert.NoError(t, err)
+	body := getJSONBody(`{"foo":2}`)
+	path.TraverseJSON(body)
+	result, err := path.TraverseJSON(body)
+	assert.NoError(t, err)
+	if resultBool, ok := result.(bool); assert.True(t, ok) {
+		assert.True(t, resultBool)
+	}
+}
+
+func TestLessThan(t *testing.T) {
+	path, err := Parse("$.foo<1")
+	assert.NoError(t, err)
+	body := getJSONBody(`{"foo":2}`)
+	path.TraverseJSON(body)
+	result, err := path.TraverseJSON(body)
+	assert.NoError(t, err)
+	if resultBool, ok := result.(bool); assert.True(t, ok) {
+		assert.False(t, resultBool)
+	}
+}
+
+func TestLessThanWithError(t *testing.T) {
+	path, err := Parse("$.foo<1")
+	assert.NoError(t, err)
+	body := getJSONBody(`{"foo":"bar"}`)
+	path.TraverseJSON(body)
+	_, err = path.TraverseJSON(body)
+	assert.Error(t, err)
+}

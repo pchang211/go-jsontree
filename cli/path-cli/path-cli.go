@@ -13,6 +13,10 @@ func main() {
 	jsonString := flag.String("j", "", "raw json string")
 	flag.Parse()
 	args := flag.Args()
+	if len(args) == 0 {
+		fmt.Println("usage: ./path-cli -j=`RAW JSON` <jsonpath>")
+		return
+	}
 
 	jsonRawInput := []byte(*jsonString)
 	var inputJSON interface{}

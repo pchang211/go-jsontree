@@ -60,6 +60,32 @@ func Parse(input string) (*JSONPath, error) {
 		case itemRightBracket:
 			debug("RIGHTBRACKET\n")
 			return nil, fmt.Errorf("close bracket ] seen without open bracket")
+		case itemLess:
+			switch next := lex.Next(); next.Type {
+			case itemEOF:
+				return nil, errors.New("unexpexted EOF")
+			case itemPathKey:
+				debugf("PATH KEY %s\n", next.Value)
+				return nil, errors.New("less than comparison must be with a number")
+			case itemNumber:
+				debugf("NUMBER: %v\n", next.Value)
+				path.AddTraverser(NewTraverser(LessThan(next.Value)))
+			default:
+				return nil, errors.New("don't know how to compare that")
+			}
+		case itemGreater:
+			switch next := lex.Next(); next.Type {
+			case itemEOF:
+				return nil, errors.New("unexpexted EOF")
+			case itemPathKey:
+				debugf("PATH KEY %s\n", next.Value)
+				return nil, errors.New("less than comparison must be with a number")
+			case itemNumber:
+				debugf("NUMBER: %v\n", next.Value)
+				path.AddTraverser(NewTraverser(GreaterThan(next.Value)))
+			default:
+				return nil, errors.New("don't know how to compare that")
+			}
 		default:
 			debugf("Not sure what to do with %v", item.Type)
 		}
