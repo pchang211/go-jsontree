@@ -1,6 +1,7 @@
 package jsonpath
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -141,28 +142,52 @@ func IndexKey(query string) TraverseFunc {
 
 // LessThan compares the current json value (must be a number) to the input int
 func LessThan(compareVal string) TraverseFunc {
-	return func(json interface{}) (interface{}, error) {
-		if jsonVal, ok := json.(float64); ok {
+	return func(jsonBody interface{}) (interface{}, error) {
+		switch j := jsonBody.(type) {
+		case json.Number:
+			val, err := j.Int64()
+			if err != nil {
+				return nil, err
+			}
+			compVal, err := strconv.ParseInt(compareVal, 0, 64)
+			if err != nil {
+				return nil, err
+			}
+			return (val < compVal), nil
+		case float64:
 			compVal, err := strconv.ParseFloat(compareVal, 64)
 			if err != nil {
 				return nil, err
 			}
-			return (jsonVal < compVal), nil
+			return (j < compVal), nil
+		default:
+			return nil, fmt.Errorf("jsonpath value (%v) is not a supported type, is %v", j, reflect.TypeOf(j))
 		}
-		return nil, fmt.Errorf("jsonpath value (%v) is not a float64, is %v. only float64 supported currently", json, reflect.TypeOf(json))
 	}
 }
 
 // GreaterThan compares the current json value (must be a number) to the input int
 func GreaterThan(compareVal string) TraverseFunc {
-	return func(json interface{}) (interface{}, error) {
-		if jsonVal, ok := json.(float64); ok {
+	return func(jsonBody interface{}) (interface{}, error) {
+		switch j := jsonBody.(type) {
+		case json.Number:
+			val, err := j.Int64()
+			if err != nil {
+				return nil, err
+			}
+			compVal, err := strconv.ParseInt(compareVal, 0, 64)
+			if err != nil {
+				return nil, err
+			}
+			return (val > compVal), nil
+		case float64:
 			compVal, err := strconv.ParseFloat(compareVal, 64)
 			if err != nil {
 				return nil, err
 			}
-			return (jsonVal > compVal), nil
+			return (j > compVal), nil
+		default:
+			return nil, fmt.Errorf("jsonpath value (%v) is not a supported type, is %v", j, reflect.TypeOf(j))
 		}
-		return nil, fmt.Errorf("jsonpath value (%v) is not a float64, is %v. only float64 supported currently", json, reflect.TypeOf(json))
 	}
 }
